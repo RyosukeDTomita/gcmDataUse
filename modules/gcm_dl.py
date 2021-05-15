@@ -3,8 +3,14 @@
 #
 # Download "気象庁過去の気象データ検索" data as csvfile (kishotyo_dl.py module version)
 #
-# Usage: 
-#
+# Usage:
+#    ```
+#    import gcm_dl.py
+#    gcm_dl.main("福島県","小名浜","2020","1","4")   #hourly data
+#    gcm_dl.main("福島県","小名浜","2020","1",None)  #daily data
+#    gcm_dl.main("福島県","小名浜","2020",None,None) #month data
+#    gcm_dl.main("福島県","小名浜",None,None,None)   #yearly data
+#    ```
 #
 #
 # Author: Ryosuke Tomita
