@@ -11,10 +11,12 @@
 import os
 import sys
 import re
+from matplotlib.ticker import MaxNLocator
 # created by user
 from readcsv import readcsv
 from myMatlib import *
-from matplotlib.ticker import MaxNLocator
+import gcm-dl
+
 
 #-------FUNCTION-------
 def getLabelName(csvfile):
@@ -27,6 +29,10 @@ dataDir = os.path.join(HOME + "/" + "kishotyo_kakonodatakensaku")
 csvfile = os.path.join(dataDir + "/" + "sampleCsv/福島県小名浜2020.csv")
 label = getLabelName(csvfile)
 jp = fontjp()
+
+
+#-------download csv data
+gcm-dl.main("福島県","小名浜",2020,1,4)
 #-------read csv file-------
 Data = readcsv(csvfile)
 #Data.headerShow()
