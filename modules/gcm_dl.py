@@ -12,7 +12,6 @@
 #    gcm_dl.main("福島県","小名浜",None,None,None)   #yearly data
 #    ```
 #
-#
 # Author: Ryosuke Tomita
 # Date: 2021/5/14
 ##########################################################################
@@ -189,16 +188,17 @@ def noneCounter(args):
 #-----MAIN-----
 def main(prefecture,city,year,month,day):
     args = {}
+    print(type(day))
     args['prefecture'] = prefecture
     args['city']       = city
-    args['year']       = year
-    args['month']      = month
-    args['day']        = day
+    args['year']       = str(year)
+    args['month']      = str(month)
+    args['day']        = str(day)
 
     noneCnt = noneCounter(args)
 
     startPageUrl = "https://www.data.jma.go.jp/obd/stats/etrn/select/prefecture00.php?prec_no=&block_no=&year=&month=&day=&view="
-    outName = (args['prefecture'] + args['city'])
+    outName = ("../data/" + args['prefecture'] + args['city'])
 
     # PrefectureUrl
     prefectureI = ScrapePrefecture(startPageUrl)
