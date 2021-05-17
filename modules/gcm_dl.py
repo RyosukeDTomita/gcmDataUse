@@ -3,9 +3,14 @@
 #
 # Download "気象庁過去の気象データ検索" data as csvfile (kishotyo_dl.py module version)
 #
-# Usage: 
-#
-#
+# Usage:
+#    ```
+#    import gcm_dl.py
+#    gcm_dl.main("福島県","小名浜",2020,1,4)   #hourly data
+#    gcm_dl.main("福島県","小名浜",2020,1,None)  #daily data
+#    gcm_dl.main("福島県","小名浜",2020,None,None) #month data
+#    gcm_dl.main("福島県","小名浜",None,None,None)   #yearly data
+#    ```
 #
 # Author: Ryosuke Tomita
 # Date: 2021/5/14
@@ -32,11 +37,14 @@ class setUrl:
 class Scraping(setUrl):
     def fetchList(self):
         self.List = []
+        self.NameList = []
         for htmlElement in self.bsObj.find("map", {"name":"point"}).findAll("area"):
             Name = htmlElement.attrs['alt']
             Href = htmlElement.attrs['href']
+            self.NameList.append(Name)
             self.List.append({Name:Href}) # "List" is consisted of dictionary.
-        return self.List
+        self.NameList = list(set(list(self.NameList))) #eraseDublicate
+        return self.NameList
 
     def renewUrl(self,Key):
         self.Key = Key
@@ -51,7 +59,19 @@ class ScrapePrefecture(Scraping):
 
 
 class ScrapeCity(Scraping):
-    pass
+    def fetchList(self):
+        self.List = []
+        self.NameList = []
+        for htmlElement in self.bsObj.find("map", {"name":"point"}).findAll("area"):
+            Name = htmlElement.attrs['alt']
+            Href = htmlElement.attrs['href']
+            if re.match('.*(県|地方)$',Name):
+                continue
+            else:
+                self.NameList.append(Name)
+                self.List.append({Name:Href}) # "List" is consisted of dictionary.
+        self.NameList = list(set(list(self.NameList))) #eraseDublicate
+        return self.NameList
 
 
 class ScrapeYear(Scraping):
@@ -140,13 +160,13 @@ class ViewPageHour(ViewPageYear):
 
 def getViewPageUrl(args,prevUrl):
     global ObsSystem
-    if   args['year'] == None:
+    if   args['year'] == 'None':
         viewPageUrl = prevUrl.replace('index.php','view/annually_s.php')
-    elif args['year'] != None and args['month'] == None:
+    elif args['year'] != 'None' and args['month'] == 'None':
         viewPageUrl = prevUrl.replace('index.php','view/monthly_s1.php')
-    elif args['month'] != None and args['day'] == None:
+    elif args['month'] != 'None' and args['day'] == 'None':
         viewPageUrl = prevUrl.replace('index.php','view/daily_s1.php')
-    elif args['day'] != None:
+    elif args['day'] != 'None':
         viewPageUrl = prevUrl.replace('index.php','view/hourly_s1.php')
     testUrl = setUrl(viewPageUrl)
     try:
@@ -175,7 +195,7 @@ def saveCsv(Instance,Columns):
 def noneCounter(args):
     noneCnt = 0
     for arg in args.values():
-        if arg == None:
+        if arg == 'None':
             noneCnt += 1
     return noneCnt
 
@@ -185,14 +205,14 @@ def main(prefecture,city,year,month,day):
     args = {}
     args['prefecture'] = prefecture
     args['city']       = city
-    args['year']       = year
-    args['month']      = month
-    args['day']        = day
+    args['year']       = str(year)
+    args['month']      = str(month)
+    args['day']        = str(day)
 
     noneCnt = noneCounter(args)
 
     startPageUrl = "https://www.data.jma.go.jp/obd/stats/etrn/select/prefecture00.php?prec_no=&block_no=&year=&month=&day=&view="
-    outName = (args['prefecture'] + args['city'])
+    outName = ("../data/" + args['prefecture'] + args['city'])
 
     # PrefectureUrl
     prefectureI = ScrapePrefecture(startPageUrl)
