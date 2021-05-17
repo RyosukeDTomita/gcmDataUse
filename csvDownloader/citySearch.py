@@ -80,7 +80,7 @@ def PrintCityList(AreaUrl):
     cityNameList = EraseDuplicate(cityNameList)
     print("-----AREA =", areaI.Key,"-----")
     for i in range (0,len(cityNameList),1):
-        if re.match('.*県',cityNameList[i]):
+        if re.match('.*(県|地方)$',cityNameList[i]):
             continue
         else:
             print(cityNameList[i])
