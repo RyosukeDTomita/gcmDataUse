@@ -65,7 +65,7 @@ class ScrapeCity(Scraping):
         for htmlElement in self.bsObj.find("map", {"name":"point"}).findAll("area"):
             Name = htmlElement.attrs['alt']
             Href = htmlElement.attrs['href']
-            if re.match('.*(県|地方|全地点|府|都)$',Name):
+            if re.match('.*(県|地方|全地点|府|都|へのリンク)$',Name):
                 continue
             else:
                 self.NameList.append(Name)
@@ -129,22 +129,23 @@ class ViewPageYear(setUrl):
         return self.df
 
 class ViewPageMonth(ViewPageYear):
-    def fetchIndex(self):
-        self.index = []
-        for Index in self.bsObj.find("table",{"id":"tablefix1"}).findAll("a"):
-            self.index.append(int(Index.get_text()))
-        return self.index
-    def fetchData(self):
-        self.datas = []
-        for data in self.bsObj.find("table",{"id":"tablefix1"}).findAll("td",{"class":"data_0_0"}):
-            try:
-                dataValue = float(data.get_text())
-            except ValueError:
-                dataValue = data.get_text()
-                if dataValue in ["--","///","#"]:
-                    dataValue = ""
-            self.datas.append(dataValue)
-        return self.datas
+    pass
+#    def fetchIndex(self):
+#        self.index = []
+#        for Index in self.bsObj.find("table",{"id":"tablefix1"}).findAll("a"):
+#            self.index.append(int(Index.get_text()))
+#        return self.index
+#    def fetchData(self):
+#        self.datas = []
+#        for data in self.bsObj.find("table",{"id":"tablefix1"}).findAll("td",{"class":"data_0_0"}):
+#            try:
+#                dataValue = float(data.get_text())
+#            except ValueError:
+#                dataValue = data.get_text()
+#                if dataValue in ["--","///","#"]:
+#                    dataValue = ""
+#            self.datas.append(dataValue)
+#        return self.datas
 
 
 class ViewPageDay(ViewPageMonth):
