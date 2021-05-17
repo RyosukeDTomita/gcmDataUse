@@ -46,8 +46,8 @@ for prefecture in prefectureList:
         if os.path.isfile(csvfile):
             continue
         else:
-            gcm_dl.main(prefecture,city,year,month,None)
             print(csvfile)
+            gcm_dl.main(prefecture,city,year,month,None)
 #-------read csv file-------
 #Data = readcsv(csvfile)
 #Data.headerShow()

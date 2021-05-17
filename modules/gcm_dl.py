@@ -65,7 +65,7 @@ class ScrapeCity(Scraping):
         for htmlElement in self.bsObj.find("map", {"name":"point"}).findAll("area"):
             Name = htmlElement.attrs['alt']
             Href = htmlElement.attrs['href']
-            if re.match('.*(県|地方)$',Name):
+            if re.match('.*(県|地方|全地点|府|都)$',Name):
                 continue
             else:
                 self.NameList.append(Name)
