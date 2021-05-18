@@ -30,3 +30,10 @@ class readcsv:
         for Header in self.df.columns:
             print(Header)
         return self.df.columns
+
+
+class readcsvNotAll(readcsv):
+    def __init__(self,csvfile):
+        self.csvfile = csvfile
+        self.df = pd.read_csv(self.csvfile,header=0,index_col=0)
+        return None
