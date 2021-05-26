@@ -8,7 +8,7 @@
 #        ```
 #        from fontjp import fontjp
 #        jp = fontjp()
-#        ax.set_xlabel("test",fontproperties=jp.font
+#        ax.set_xlabel("test",fontproperties=jp.font)
 #        ```
 #
 #        OR
@@ -16,7 +16,7 @@
 #        ```
 #        from fontjp import fontjp
 #        jp = fontjp()
-#        ax.set_xlabel("test",fontproperties=jp()
+#        ax.set_xlabel("test",fontproperties=jp())
 #        ```
 # Author: Ryosuke Tomita
 # Date: 2021/5/6
