@@ -15,62 +15,66 @@ from matplotlib.ticker import MaxNLocator
 # created by user
 from readcsv import readcsv
 from myMatlib import *
-import gcm_dl
+import jma_dl
 
 
 #-------FUNCTION-------
-def getLabelName(csvfile):
-    matchObj = re.search('1|2.*[0-9]',str(csvfile))
+def getLabelName(csvName):
+    matchObj = re.search('1|2.*[0-9]',str(csvName))
     return matchObj.group()
 
 def getCsvName(year,month,day):
-    if   year == None:
-        csvname = (prefecture + city + ".csv")
-    elif year != None and month == None:
-        csvname = (prefecture + city + "_" + year + ".csv")
-    elif month != None and day == None:
-        csvname = (prefecture + city + "_" + year + "_" + month + ".csv")
-    elif day != None:
-        csvname = (prefecture + city + "_" + year + "_" + month + "_" + day + ".csv")
-    return csvfile
+    if   year == "None":
+        csvName = (prefecture + city + ".csv")
+    elif year != "None" and month == "None" :
+        csvName = (prefecture + city + year + ".csv")
+    elif month != "None" and day == "None":
+        csvName = (prefecture + city + year + "_" + month + ".csv")
+    elif day != "None":
+        csvName = (prefecture + city + year + "_" + month + "_" + day + ".csv")
+    return csvName
 #-------parameter setting-------
 HOME = os.getenv("HOME")
-dataDir = os.path.join(HOME + "/" + "kishotyo_kakonodatakensaku")
+dataDir = os.path.join(HOME + "/jmaDataUse/data")
+figDir = os.path.join(HOME + "/jmaDataUse/modules/fig")
+PWD = os.getcwd()
 year  = sys.argv[1]
 month = sys.argv[2]
 day   = sys.argv[3]
 headerKey = sys.argv[4]
-previousN = sys.argv[5]
-if previousN > 5:
-    print("previousN is larger than expected")
-elif previousN == "":
-    previousN == 0
+#previousN = sys.argv[5]
+#if previousN > 5:
+#    print("previousN is larger than expected")
+#elif previousN == "":
+#    previousN == 0
 jp = fontjp()
 
 
 #-------download csv data
-prefectureI = gcm_dl.ScrapePrefecture("https://www.data.jma.go.jp/obd/stats/etrn/select/prefecture00.php?prec_no=&block_no=&year=&month=&day=&view=")
+prefectureI = jma_dl.ScrapePrefecture("https://www.data.jma.go.jp/obd/stats/etrn/select/prefecture00.php?prec_no=&block_no=&year=&month=&day=&view=")
 prefectureList = prefectureI.fetchList()
 for prefecture in prefectureList:
     newUrl = prefectureI.renewUrl(prefecture)
-    cityI = gcm_dl.ScrapeCity(newUrl)
+    cityI = jma_dl.ScrapeCity(newUrl)
     cityList = cityI.fetchList()
     for city in cityList:
-        csvfile = getCsvName
-        if os.path.isfile(csvfile):
+        csvName = getCsvName(year,month,day)
+        if os.path.isfile(csvName):
             continue
         else:
-            print(csvfile)
-            gcm_dl.main(prefecture,city,year,month,day)
+            print(csvName)
+            jma_dl.main(prefecture,city,year,month,day)
 #-------read csv file-------
-            label = getLabelName(csvfile)
-            Data = readcsv(csvfile)
-            Data.headerShow()
+            csvFile = os.path.join(HOME + "/jmaDataUse/data/" + csvName)
+            label = getLabelName(csvFile)
+            Data = readcsv(csvFile)
+#            Data.headerShow()
             x = Data.index
-            print(x)
             #y = Data["現地平均気圧 (hPa)"]
-            y = Data[headerKey]
-            print(y)
+            try:
+                y = Data[headerKey]
+            except KeyError:
+                continue #headerKey is not found.
 
 #-------graph-------
             grapher = pltSet()
@@ -89,7 +93,7 @@ for prefecture in prefectureList:
                     color="b",
                     linestyle="solid")
             ax.xaxis.set_major_locator(MaxNLocator(integer=True)) #x axis is integer
-            ax.set_xlabel("test",
+            ax.set_xlabel(getLabelName(csvName),
                         fontsize=20,
                         fontproperties=jp())
             ax.set_ylabel(Data.header,
@@ -108,5 +112,7 @@ for prefecture in prefectureList:
                     linestyle='-',
                     alpha=0.2)
             ax.legend(ncol=2, bbox_to_anchor=(0.,1.02, 1., 0.102),loc=3)
-            figTitle = csvfile.replace(".csv","")
-            fig.savefig("test",bbox_inches="tight",pad_inches=0.5)
+            figName = csvName.replace(".csv","")
+            os.chdir(figDir)
+            fig.savefig(figName,bbox_inches="tight",pad_inches=0.5)
+            os.chdir(PWD)

@@ -1,7 +1,8 @@
 #########################################################################
 # Name: fontjp.py
 #
-# return 
+# Return japanese font path.
+# if you do not have source-han-code-jp, you can download [here](https://github.com/adobe-fonts/source-han-code-jp/archive/2.000R.zip)
 #
 # Usage:
 #        ```
@@ -9,7 +10,7 @@
 #        jp = fontjp()
 #        ax.set_xlabel("test",fontproperties=jp.font
 #        ```
-
+#
 #        OR
 #
 #        ```
