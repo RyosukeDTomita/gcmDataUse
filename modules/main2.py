@@ -24,13 +24,13 @@ def getLabelName(csvName):
     return matchObj.group()
 
 def getCsvName(year,month,day):
-    if   year == None:
+    if   not year:
         csvName = (prefecture + city + ".csv")
-    elif year != None and month == None :
+    elif year and not month :
         csvName = (prefecture + city + year + ".csv")
-    elif month != None and day == None:
+    elif month and not day:
         csvName = (prefecture + city + year + "_" + month + ".csv")
-    elif day != None:
+    elif not day:
         csvName = (prefecture + city + year + "_" + month + "_" + day + ".csv")
     return csvName
 #-------parameter setting-------
@@ -39,21 +39,29 @@ dataDir = os.path.join(HOME + "/jmaDataUse/data")
 figDir = os.path.join(HOME + "/jmaDataUse/modules/fig")
 PWD = os.getcwd()
 jp = fontjp()
-
+linestyle=["solid","dashed","dashdot","dotted"]
+plotcolor=["b","g","o","r"]
 #-------parser setting-------
 parser = argparse.ArgumentParser()
 parser.add_argument("-y","--year",help="Select target year",type=str)
 parser.add_argument("-m","--month",help="Select target month",type=str)
 parser.add_argument("-d","--day",help="Select target day",type=str)
 parser.add_argument("-k","--headerkey",help="From your data(.csv) has header. You can chose one. ex: python3 main2.py -y 2020 -k 現地平均気圧 (hPa)",type=str)
+parser.add_argument("-n","--privious",help="Default is 0. If you declare n > 0 then, download privious n years. Max n=4",type=int)
 args = parser.parse_args()
 year = args.year
 month = args.month
 day = args.day
 headerKey = args.headerkey
+priviousN = args.privious
+if priviousN > 5:
+    print("priviousN =",priviousN,"Max = 4")
+    exit
+else:
+    pass
 
 
-#-------download csv data
+#-------download csv data-------
 prefectureI = jma_dl.ScrapePrefecture("https://www.data.jma.go.jp/obd/stats/etrn/select/prefecture00.php?prec_no=&block_no=&year=&month=&day=&view=")
 prefectureList = prefectureI.fetchList()
 for prefecture in prefectureList:
@@ -61,13 +69,17 @@ for prefecture in prefectureList:
     cityI = jma_dl.ScrapeCity(newUrl)
     cityList = cityI.fetchList()
     for city in cityList:
-        csvName = getCsvName(year,month,day)
-        if os.path.isfile(csvName):
-            print(csvName , " is already exist! Skip download data.")
-            #continue
-        else:
-            print("Downloading ", csvName)
-            jma_dl.main(prefecture,city,year,month,day)
+        grapher = pltSet()
+        fig = grapher.fig
+        ax = grapher.ax
+        year = args.year #reset year
+        for n in range(0,priviousN + 1,1):
+            csvName = getCsvName(year,month,day)
+            if os.path.isfile(csvName):
+                print(csvName , " is already exist! Skip download data.")
+            else:
+                print("Downloading ", csvName)
+                jma_dl.main(prefecture=prefecture,city=city,year=year,month=month,day=day)
 #-------read csv file-------
             csvFile = os.path.join(HOME + "/jmaDataUse/data/" + csvName)
             label = getLabelName(csvFile)
@@ -77,15 +89,9 @@ for prefecture in prefectureList:
                 y = Data[headerKey]
             except KeyError:
                 print(headerKey, " is not exist!")
-                continue #headerKey is not found.
+                break
 
-#-------graph-------
-            grapher = pltSet()
-            fig = grapher.fig
-            ax = grapher.ax
-
-            linestyle=["hoge","solid","dashed","dashdot","dotted"]
-            plotcolor=["hoge","b","g","o","r"]
+#-------plot data-------
 
 
             ax.plot(x,y,marker='.',
@@ -93,8 +99,8 @@ for prefecture in prefectureList:
                     markeredgewidth=1.,
                     markeredgecolor="k",
                     label= label,
-                    color="b",
-                    linestyle="solid")
+                    color=plotcolor[n],
+                    linestyle=linestyle[n])
             ax.xaxis.set_major_locator(MaxNLocator(integer=True)) #x axis is integer
             ax.set_xlabel(getLabelName(csvName),
                         fontsize=20,
@@ -115,8 +121,8 @@ for prefecture in prefectureList:
                     linestyle='-',
                     alpha=0.2)
             ax.legend(ncol=2, bbox_to_anchor=(0.,1.02, 1., 0.102),loc=3)
-            figName = csvName.replace(".csv","")
-            os.chdir(figDir)
-            fig.savefig(figName,bbox_inches="tight",pad_inches=0.5)
-            print("figName")
-            os.chdir(PWD)
+            year = str(int(year) - 1)
+        figName = csvName.replace(".csv","")
+        os.chdir(figDir)
+        fig.savefig(figName,bbox_inches="tight",pad_inches=0.5)
+        os.chdir(PWD)
